@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 
 import { sample } from "../../utils";
 import { WORDS } from "../../data";
@@ -10,22 +10,38 @@ import DefeatBanner from "../DefeatBanner";
 import Keyboard from "../Keyboard";
 import { checkGuess } from "../../game-helpers";
 
-// Pick a random word on every pageload.
-const answer = sample(WORDS);
-// To make debugging easier, we'll log the solution in the console.
-console.info({ answer });
+const PENDING_STATUS = "Pending";
+const VICTORY_STATUS = "Victory";
+const DEFEAT_STATUS = "Defeat";
 
 function Game() {
-  const [guesses, setGuesses] = React.useState([]);
-  const [gameStatus, setGameStatus] = React.useState("Pending");
+  const [guesses, setGuesses] = useState([]);
+  const [gameStatus, setGameStatus] = useState(PENDING_STATUS);
+
+  // generates a new word upon every restart
+  const [answer, setAnswer] = useState(() => {
+    const initialAnswer = sample(WORDS);
+    console.info({ initialAnswer });
+    return initialAnswer;
+  });
+
+  const handleRestart = () => {
+    // choose new word, reset guesses, reset games status
+    const newAnswer = sample(WORDS);
+    setAnswer(newAnswer);
+    setGuesses([]);
+    setGameStatus(PENDING_STATUS);
+    // To make debugging easier, we'll log the solution in the console.
+    console.info({ newAnswer });
+  };
 
   const addToGuesses = (guess) => {
     const nextGuesses = [...guesses, guess];
     // validate answer
     if (guess === answer) {
-      setGameStatus("Victory");
+      setGameStatus(VICTORY_STATUS);
     } else if (nextGuesses.length === NUM_OF_GUESSES_ALLOWED) {
-      setGameStatus("Defeat");
+      setGameStatus(DEFEAT_STATUS);
     }
     setGuesses(nextGuesses);
   };
@@ -39,10 +55,15 @@ function Game() {
 
       <GuessInput addToGuesses={addToGuesses} gameStatus={gameStatus} />
 
-      {gameStatus === "Victory" && (
-        <VictoryBanner numOfGuesses={guesses.length} />
+      {gameStatus === VICTORY_STATUS && (
+        <VictoryBanner
+          actionFunction={handleRestart}
+          numOfGuesses={guesses.length}
+        />
       )}
-      {gameStatus === "Defeat" && <DefeatBanner answer={answer} />}
+      {gameStatus === DEFEAT_STATUS && (
+        <DefeatBanner actionFunction={handleRestart} answer={answer} />
+      )}
 
       <Keyboard checkedGuesses={checkedGuesses} />
     </>

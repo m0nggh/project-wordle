@@ -1,9 +1,9 @@
 import React from "react";
 import Banner from "../Banner";
 
-function VictoryBanner({ numOfGuesses }) {
+function VictoryBanner({ actionFunction, numOfGuesses }) {
   return (
-    <Banner status="happy">
+    <Banner status="happy" actionFunction={actionFunction}>
       <p>
         <strong>Congratulations!</strong> Got it in {` `}
         <strong>
