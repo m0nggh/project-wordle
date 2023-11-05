@@ -1,9 +1,9 @@
 import React from "react";
 import Banner from "../Banner/";
 
-function DefeatBanner({ answer }) {
+function DefeatBanner({ actionFunction, answer }) {
   return (
-    <Banner status="sad">
+    <Banner status="sad" actionFunction={actionFunction}>
       <p>
         Sorry, the correct answer is <strong>{answer}</strong>.
       </p>

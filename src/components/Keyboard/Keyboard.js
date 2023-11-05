@@ -8,7 +8,6 @@ const rows = [
 
 function generateMapping(checkedGuesses) {
   const letterToStatusMap = {};
-  console.log(checkedGuesses);
   checkedGuesses.forEach((guess) => {
     // each guess is made up of 5 slots
     guess.forEach((result) => {
