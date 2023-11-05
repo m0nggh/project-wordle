@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { sample } from "../../utils";
 import { WORDS } from "../../data";
@@ -25,7 +25,9 @@ function Game() {
     return initialAnswer;
   });
 
-  const handleRestart = () => {
+  const inputRef = useRef();
+
+  const handleRestart = useCallback(() => {
     // choose new word, reset guesses, reset games status
     const newAnswer = sample(WORDS);
     setAnswer(newAnswer);
@@ -33,27 +35,45 @@ function Game() {
     setGameStatus(PENDING_STATUS);
     // To make debugging easier, we'll log the solution in the console.
     console.info({ newAnswer });
-  };
+  }, []);
 
-  const addToGuesses = (guess) => {
-    const nextGuesses = [...guesses, guess];
-    // validate answer
-    if (guess === answer) {
-      setGameStatus(VICTORY_STATUS);
-    } else if (nextGuesses.length === NUM_OF_GUESSES_ALLOWED) {
-      setGameStatus(DEFEAT_STATUS);
+  // focus on input field whenever restart game is triggered
+  useEffect(() => {
+    // sanity check
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
-    setGuesses(nextGuesses);
-  };
+  }, [answer]);
+
+  const addToGuesses = useCallback(
+    (guess) => {
+      const nextGuesses = [...guesses, guess];
+      // validate answer
+      if (guess === answer) {
+        setGameStatus(VICTORY_STATUS);
+      } else if (nextGuesses.length === NUM_OF_GUESSES_ALLOWED) {
+        setGameStatus(DEFEAT_STATUS);
+      }
+      setGuesses(nextGuesses);
+    },
+    [answer, guesses]
+  );
 
   // validate the guesses to be used instead
-  const checkedGuesses = guesses.map((guess) => checkGuess(guess, answer));
+  const checkedGuesses = useMemo(
+    () => guesses.map((guess) => checkGuess(guess, answer)),
+    [guesses, answer]
+  );
 
   return (
     <>
       <PreviousGuesses checkedGuesses={checkedGuesses}></PreviousGuesses>
 
-      <GuessInput addToGuesses={addToGuesses} gameStatus={gameStatus} />
+      <GuessInput
+        ref={inputRef}
+        addToGuesses={addToGuesses}
+        gameStatus={gameStatus}
+      />
 
       {gameStatus === VICTORY_STATUS && (
         <VictoryBanner
