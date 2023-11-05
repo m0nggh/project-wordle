@@ -7,6 +7,8 @@ import GuessInput from "../GuessInput";
 import PreviousGuesses from "../PreviousGuesses";
 import VictoryBanner from "../VictoryBanner";
 import DefeatBanner from "../DefeatBanner";
+import Keyboard from "../Keyboard";
+import { checkGuess } from "../../game-helpers";
 
 // Pick a random word on every pageload.
 const answer = sample(WORDS);
@@ -28,14 +30,21 @@ function Game() {
     setGuesses(nextGuesses);
   };
 
+  // validate the guesses to be used instead
+  const checkedGuesses = guesses.map((guess) => checkGuess(guess, answer));
+
   return (
     <>
-      <PreviousGuesses guesses={guesses} answer={answer}></PreviousGuesses>
+      <PreviousGuesses checkedGuesses={checkedGuesses}></PreviousGuesses>
+
       <GuessInput addToGuesses={addToGuesses} gameStatus={gameStatus} />
+
       {gameStatus === "Victory" && (
         <VictoryBanner numOfGuesses={guesses.length} />
       )}
       {gameStatus === "Defeat" && <DefeatBanner answer={answer} />}
+
+      <Keyboard checkedGuesses={checkedGuesses} />
     </>
   );
 }
